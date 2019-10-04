@@ -32,6 +32,27 @@ Session(app)
 db = SQL("sqlite:///notes.db")
 
 
+@app.route("/delete_note", methods=["POST"])
+@login_required
+def delete_note():
+    """Delete the note and return True if successful in JSON"""
+    note_id = request.form.get("id")
+    db.execute("DELETE FROM notes WHERE id = :id", id=note_id)
+    return jsonify(True)
+
+
+@app.route("/")
+@login_required
+def index():
+    """Display all the notes the user has"""
+
+    # get all the user's notes from the database
+    notes = db.execute("SELECT note, tag FROM notes WHERE id = :id", id=session["user_id"])
+
+    # pass in all the notes to html webpage to display
+    return render_template("index.html", notes = notes)
+
+
 @app.route("/check", methods=["GET"])
 def check():
     """Return true if username available, else false, in JSON format"""

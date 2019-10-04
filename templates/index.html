@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+All Notes
+{% endblock %}
+
+{% block main %}
+<div id="all_notes">
+    {% for dicts in notes %}
+    <div class="note_tag_div">
+        <textarea class="note" readonly>{{ dicts["note"] }}</textarea>
+        <p class="tag">{{ dicts["tag"] }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
