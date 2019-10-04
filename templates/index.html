@@ -5,6 +5,34 @@ All Notes
 {% endblock %}
 
 {% block main %}
+<div id="search_notes">
+    <form action="/search_note">
+        <div class="form-row">
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Enter your search query here!">
+            </div>
+            <div class="col-3 form-control">
+                <div id="search_by_text">
+                    <b>Search By: </b>
+                </div>
+                <div id="search_by_radio">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="search_by" id="search_by_note" value="note">
+                        <label class="form-check-label" for="search_by_note">Note</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="search_by" id="search_by_tag" value="tag">
+                        <label class="form-check-label" for="search_by_tag">Tag</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+<br>
 <div id="all_notes">
     {% for dicts in notes %}
     <div class="note_tag_div">
