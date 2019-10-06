@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}
+New Note
+{% endblock %}
+
+{% block main %}
+<div id="new_note_div">
+    <form action="/new_note" method="POST" id="new_note">
+        <textarea name="note" placeholder="Type your note here!" class="form-control" rows="6" autofocus
+            id="note_input"></textarea>
+        <div class="inputs">
+            <input type="text" name="tag" placeholder="Please provide a tag for the note!" class="form-control"
+                id="note_tag">
+            <div class="">
+                <button type="submit" class="btn btn-outline-secondary" id="save_btn">Save</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.querySelector("#save_btn").addEventListener("click", function(evnet) {
+        // stop default action
+        event.preventDefault();
+        // check if empty
+        if (!document.querySelector("#note_input").value) {
+            document.querySelector("#note_input").placeholder = "You must type a note first!"
+            setTimeout(() => {
+                document.querySelector("#note_input").placeholder = "Type your note here!"
+            }, 4000);
+        }
+        else if (!document.querySelector("#note_tag").value) {
+            document.querySelector("#note_tag").placeholder = "You must provide a TAG!"
+            setTimeout(() => {
+                document.querySelector("#note_tag").placeholder = "Please provide a tag for the note!"
+            }, 4000);
+        }
+        else {
+            document.querySelector("#save_btn").disabled = true;
+            document.querySelector("#save_btn").innerText = "Saving..."
+            setTimeout(function () {
+                document.querySelector("#save_btn").disabled = false;
+            }, 2000);
+        }
+        
+        // post the note to flask app
+        $.post("/new_note",
+            {
+                tag: $("#note_tag").val(),
+                note: $("#note_input").val()
+            },
+            (function (response) {
+                if (response == true) {
+                    document.querySelector("#new_note_div").innerHTML = `<b>Successfully Saved!</b>` + document.querySelector("#new_note_div").innerHTML;
+                    document.querySelector("#save_btn").innerText = "Save";
+                    // refresh the webpage
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                }
+                else {
+                    document.querySelector("#new_note_div").innerHTML = `<b>Failed! Try again.</b>` + document.querySelector("#new_note_div").innerHTML;
+                    document.querySelector("#save_btn").innerText = "Save";
+                    setTimeout(function () {
+                        location.reload();
+                    }, 500);
+                }
+            }))
+    })
+</script>
+
+{% endblock %}
