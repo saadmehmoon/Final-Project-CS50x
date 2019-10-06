@@ -32,6 +32,35 @@ Session(app)
 db = SQL("sqlite:///notes.db")
 
 
+@app.route("/new_note", methods=["GET", "POST"])
+@login_required
+def new_note():
+    """Add a new note to the database"""
+    # if user reached via a form by post
+    if request.method == "POST":
+        # assign variables to the user's input
+        tag = request.form.get("tag")
+        note = request.form.get("note")
+        # check if the user provided valid inputs
+        if not note or not tag:
+            return apology("You must provide a note and a tag")
+        # if the user provided valid input, insert it into database
+        db.execute("INSERT INTO notes (note, tag, user_id) VALUES (:note, :tag, :id)",
+                   note=note, tag=tag, id=session["user_id"])
+        # return a JSON response that note was saved successfully
+        return jsonify(True)
+    # if the user reached by clicking a link
+    else:
+        return render_template("new_note.html")
+
+
+@app.route("/about")
+@login_required
+def about():
+    """Render the about me page"""
+    return render_template("about.html")
+
+
 @app.route("/delete_note", methods=["POST"])
 @login_required
 def delete_note():
@@ -41,13 +70,35 @@ def delete_note():
     return jsonify(True)
 
 
+@app.route("/search_note", methods=["POST"])
+@login_required
+def search_note():
+    """Search for the note in database and return the result"""
+    # get the user's input and assign it variables
+    search_query = request.form.get("search_query")
+    search_by = request.form.get("search_by")
+    # check if user provided a valid input
+    if not search_query or not search_by:
+        return apology("You must provide a search query")
+    # if user wants to search note's text
+    if search_by == "note":
+        notes = db.execute("SELECT note, tag, id FROM notes WHERE note LIKE :note GROUP BY id HAVING user_id = :id",
+                           id=session["user_id"], note=search_query)
+        return jsonify(notes)
+    # if user wants to search by the tag
+    else:
+        notes = db.execute("SELECT note, tag, id FROM notes WHERE tag LIKE :tag GROUP BY id HAVING user_id = :id",
+                           id=session["user_id"], tag=search_query)
+        return jsonify(notes)
+
+
 @app.route("/")
 @login_required
 def index():
     """Display all the notes the user has"""
 
     # get all the user's notes from the database
-    notes = db.execute("SELECT note, tag FROM notes WHERE id = :id", id=session["user_id"])
+    notes = db.execute("SELECT note, tag, id FROM notes WHERE user_id = :user_id ORDER BY id DESC", user_id=session["user_id"])
 
     # pass in all the notes to html webpage to display
     return render_template("index.html", notes = notes)

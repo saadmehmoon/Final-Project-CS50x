@@ -6,33 +6,33 @@ All Notes
 
 {% block main %}
 <div id="search_notes">
-    <form action="/search_note">
-        <div class="form-row">
-            <div class="col">
-                <input type="text" class="form-control" placeholder="Enter your search query here!">
+    <form action="/search_note" method="POST" id="search">
+        <div class="inputs mb-3" id="search_box">
+            <input type="text" class="form-control" placeholder="Enter your search query here!" name="search_query" id="search_query" autofocus>
+            <div id="search_btn" class="inputs-append">
+                <button type="submit" class="btn btn-outline-secondary" id="search_btn">Search</button>
             </div>
-            <div class="col-3 form-control">
-                <div id="search_by_text">
-                    <b>Search By: </b>
-                </div>
-                <div id="search_by_radio">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="search_by" id="search_by_note" value="note">
-                        <label class="form-check-label" for="search_by_note">Note</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="search_by" id="search_by_tag" value="tag">
-                        <label class="form-check-label" for="search_by_tag">Tag</label>
-                    </div>
-                </div>
+        </div>
+        <div class="form-control" id="search_options">
+            <div id="search_by_text" class="">
+                <b>Search By:</b>
             </div>
-            <div class="col-1">
-                <button type="submit" class="btn btn-primary">Search</button>
+            <div id="search_by_radio" class="">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="search_by" id="search_by_note" value="note" checked>
+                    <label class="form-check-label" for="search_by_note">Note</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="search_by" id="search_by_tag" value="tag">
+                    <label class="form-check-label" for="search_by_tag">Tag</label>
+                </div>
             </div>
         </div>
     </form>
 </div>
+
 <br>
+
 <div id="all_notes">
     {% for dicts in notes %}
     <div class="note_tag_div">
@@ -41,4 +41,37 @@ All Notes
     </div>
     {% endfor %}
 </div>
+
+<script>
+    document.querySelector("#search_btn").addEventListener("click", function (evnet) {
+        // stop default action
+        event.preventDefault();
+        // check if empty
+        if (!document.querySelector("#search_query").value) {
+            document.querySelector("#search_query").placeholder = "You must provide a search Query!"
+            setTimeout(() => {
+                document.querySelector("#search_query").placeholder = "Enter your search query here!"
+            }, 4000);
+        }
+
+        // post the note to flask app
+        $.post("/search_note",
+            {
+                search_query: $("#search_query").val(),
+                search_by: $('input[name=search_by]:checked', '#search').val()
+            },
+            (function (response) {
+                notes_list = response;
+                document.querySelector("#all_notes").innerHTML = ""
+                notes_list.forEach(function (dicts) {
+                    document.querySelector("#all_notes").innerHTML = document.querySelector("#all_notes").innerHTML + `<div class="note_tag_div">
+                                                <textarea readonly class="note">${ dicts["note"] }</textarea>
+                                                <p class="tag"> ${ dicts["tag"] }</p>
+                                              </div>`;
+                    nResult += 1;
+                });
+                document.querySelector("#all_notes").innerHTML = `<p class="notice">Found these notes: ` + document.querySelector("#all_notes").innerHTML;
+            }))
+    })
+</script>
 {% endblock %}
