@@ -75,19 +75,19 @@ def delete_note():
 def search_note():
     """Search for the note in database and return the result"""
     # get the user's input and assign it variables
-    search_query = request.form.get("search_query")
+    search_query = '%' + request.form.get("search_query") + '%'
     search_by = request.form.get("search_by")
     # check if user provided a valid input
     if not search_query or not search_by:
         return apology("You must provide a search query")
     # if user wants to search note's text
     if search_by == "note":
-        notes = db.execute("SELECT note, tag, id FROM notes WHERE note LIKE :note GROUP BY id HAVING user_id = :id",
+        notes = db.execute("SELECT note, tag, id FROM notes WHERE note LIKE :note AND user_id = :id",
                            id=session["user_id"], note=search_query)
         return jsonify(notes)
     # if user wants to search by the tag
     else:
-        notes = db.execute("SELECT note, tag, id FROM notes WHERE tag LIKE :tag GROUP BY id HAVING user_id = :id",
+        notes = db.execute("SELECT note, tag, id FROM notes WHERE tag LIKE :tag AND user_id = :id",
                            id=session["user_id"], tag=search_query)
         return jsonify(notes)
 
@@ -101,7 +101,7 @@ def index():
     notes = db.execute("SELECT note, tag, id FROM notes WHERE user_id = :user_id ORDER BY id DESC", user_id=session["user_id"])
 
     # pass in all the notes to html webpage to display
-    return render_template("index.html", notes = notes)
+    return render_template("index.html", notes = notes, user_id = session["user_id"])
 
 
 @app.route("/check", methods=["GET"])
@@ -123,37 +123,44 @@ def check():
 def login():
     """Log user in"""
 
-    # Forget any user_id
-    session.clear()
+    # check if user is already logged in
+    try:
+        session["user_id"]
+    except:
+        # Forget any user_id
+        session.clear()
 
-    # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
+        # User reached route via POST (as by submitting a form via POST)
+        if request.method == "POST":
 
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 403)
+            # Ensure username was submitted
+            if not request.form.get("username"):
+                return apology("must provide username", 403)
 
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 403)
+            # Ensure password was submitted
+            elif not request.form.get("password"):
+                return apology("must provide password", 403)
 
-        # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          username=request.form.get("username"))
+            # Query database for username
+            rows = db.execute("SELECT * FROM users WHERE username = :username",
+                            username=request.form.get("username"))
 
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid username and/or password", 403)
+            # Ensure username exists and password is correct
+            if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+                return apology("invalid username and/or password", 403)
 
-        # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+            # Remember which user has logged in
+            session["user_id"] = rows[0]["id"]
 
-        # Redirect user to home page
-        return redirect("/")
+            # Redirect user to home page
+            return redirect("/")
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("login.html")
+        # User reached route via GET (as by clicking a link or via redirect)
+        else:
+            return render_template("login.html")
+    
+    # if a user is already logged-in
+    return redirect("/")
 
 
 @app.route("/logout")

@@ -24,6 +24,24 @@ Register
     document.getElementById("submit_btn").addEventListener("click", function (event) {
         //stop button submitting form as normal, allows code to check it
         event.preventDefault();
+
+        //check if user inputs are valid
+        username = $('input[name="username"]')
+        password = $('input[name="password"]')
+        confirmation = $('input[name="confirmation"]')
+        if (username.val().length == 0 || password.val().length == 0 || confirmation.val().length == 0) {
+            alert("empty username or password!");
+            reutrn
+        }
+        if (password.val().length < 8) {
+            alert("password must be at least 8 charaters long")
+            return
+        }
+        if (password.val() != confirmation.val()) {
+            alert("passwords do not match")
+            return
+        }
+
         //send typed username to /check route and only if response is true (meaning the username is available) submit the form
         $.get("/check",
             { username: $("#username").val() },

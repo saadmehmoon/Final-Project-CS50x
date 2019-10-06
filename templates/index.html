@@ -7,12 +7,6 @@ All Notes
 {% block main %}
 <div id="search_notes">
     <form action="/search_note" method="POST" id="search">
-        <div class="inputs mb-3" id="search_box">
-            <input type="text" class="form-control" placeholder="Enter your search query here!" name="search_query" id="search_query" autofocus>
-            <div id="search_btn" class="inputs-append">
-                <button type="submit" class="btn btn-outline-secondary" id="search_btn">Search</button>
-            </div>
-        </div>
         <div class="form-control" id="search_options">
             <div id="search_by_text" class="">
                 <b>Search By:</b>
@@ -28,16 +22,39 @@ All Notes
                 </div>
             </div>
         </div>
+        <div class="inputs mb-3" id="search_box">
+            <input type="text" class="form-control" placeholder="Enter your search query here!" name="search_query" id="search_query" autofocus>
+            <div id="search_btn" class="inputs-append">
+                <button type="submit" class="btn btn-outline-secondary" id="search_btn">Search</button>
+            </div>
+        </div>
+        
     </form>
 </div>
 
 <br>
 
-<div id="all_notes">
+<div id="all_notes_flex" class="flex-container">
     {% for dicts in notes %}
-    <div class="note_tag_div">
-        <textarea class="note" readonly>{{ dicts["note"] }}</textarea>
-        <p class="tag">{{ dicts["tag"] }}</p>
+    <div class="all_notes">
+        <div class="tag_div">
+            <p class="tag"><b>{{ dicts["tag"] }}</b></p>
+        </div>
+        <div class="note_div">
+            <textarea class="note" readonly rows="5">{{ dicts["note"] }}</textarea>
+        </div>
+        
+        <!-- Delete button will not display if user did not login which means user_id is 0 -->
+        {% if user_id != 0 %}
+        <div id="delete_note_div">
+            <form action="/delete_note" method="POST" id="delete_note_form">
+                <input type="hidden" id="delete_note_id" value="{{ dicts['id'] }}" name="id">
+                <button class="btn" id="delete_note_btn" type="submit">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
 </div>
@@ -55,6 +72,7 @@ All Notes
         }
 
         // post the note to flask app
+        n_of_notes = 0;
         $.post("/search_note",
             {
                 search_query: $("#search_query").val(),
@@ -62,16 +80,50 @@ All Notes
             },
             (function (response) {
                 notes_list = response;
-                document.querySelector("#all_notes").innerHTML = ""
+                document.querySelector("#all_notes_flex").innerHTML = ""
                 notes_list.forEach(function (dicts) {
-                    document.querySelector("#all_notes").innerHTML = document.querySelector("#all_notes").innerHTML + `<div class="note_tag_div">
-                                                <textarea readonly class="note">${ dicts["note"] }</textarea>
-                                                <p class="tag"> ${ dicts["tag"] }</p>
-                                              </div>`;
-                    nResult += 1;
+                    document.querySelector("#all_notes_flex").innerHTML = document.querySelector("#all_notes_flex").innerHTML +
+                                                                        `<div class="all_notes">
+                                                                            <div class="tag_div"><p class="tag"><b>${ dicts["tag"] }</b></p></div>
+                                                                            <div class="note_div"><textarea class="note" readonly rows="5">${ dicts["note"] }</textarea></div>
+                                                                            {% if user_id != 0 %}
+                                                                            <div id="delete_note_div">
+                                                                                <form action="/deletenote" method="POST" id="delete_note_form">
+                                                                                    <input type="hidden" id="delete_note_id" value="${ dicts[2] }" name="id">
+                                                                                    <button class="btn" id="delete_note_btn" type="submit"><i class="fa fa-trash"></i></button>
+                                                                                </form>
+                                                                            </div>
+                                                                            {% endif %}
+                                                                        </div>`;
+                    n_of_notes += 1;
                 });
-                document.querySelector("#all_notes").innerHTML = `<p class="notice">Found these notes: ` + document.querySelector("#all_notes").innerHTML;
+                document.querySelector("#all_notes_flex").innerHTML = `<p class="notice">Found ${n_of_notes} Notes:</p>` + document.querySelector("#all_notes_flex").innerHTML;
             }))
     })
+
+    // Delete note and display if it succeeded without going to a new page
+    if ({{ user_id }} != 0) {
+        document.querySelector("#delete_note_btn").addEventListener("click", function (evnet) {
+            // Stop default action
+            event.preventDefault();
+            // Use /deletenote to delete the note
+            $.post("/delete_note",
+                {
+                    id: $("#delete_note_id").val()
+                },
+                (function (response) {
+                    if (response == true) {
+                        document.querySelector("#search_notes").innerHTML = `<h3>Deleted!</h3>` + document.querySelector("#search_notes").innerHTML;
+                        // refresh the webpage
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500);
+                    }
+                    else {
+                        document.querySelector("#search_notes").innerHTML = `<h3>Failed! Refresh the webpage and try again.</h3>` + document.querySelector("#search_notes").innerHTML;
+                    }
+                }))
+         })
+    }
 </script>
 {% endblock %}

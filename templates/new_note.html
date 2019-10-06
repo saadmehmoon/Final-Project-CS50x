@@ -52,7 +52,7 @@ New Note
             },
             (function (response) {
                 if (response == true) {
-                    document.querySelector("#new_note_div").innerHTML = `<b>Successfully Saved!</b>` + document.querySelector("#new_note_div").innerHTML;
+                    document.querySelector("#new_note_div").innerHTML = `<h3>Successfully Saved!</h3>` + document.querySelector("#new_note_div").innerHTML;
                     document.querySelector("#save_btn").innerText = "Save";
                     // refresh the webpage
                     setTimeout(function () {
@@ -60,7 +60,7 @@ New Note
                     }, 500);
                 }
                 else {
-                    document.querySelector("#new_note_div").innerHTML = `<b>Failed! Try again.</b>` + document.querySelector("#new_note_div").innerHTML;
+                    document.querySelector("#new_note_div").innerHTML = `<h3>Failed! Try again.</h3>` + document.querySelector("#new_note_div").innerHTML;
                     document.querySelector("#save_btn").innerText = "Save";
                     setTimeout(function () {
                         location.reload();

@@ -71,4 +71,59 @@ main img
     float: right;
 }
 
+/* Style delete_note button used in note.html */
+#delete_note_form .btn {
+    background-color: DodgerBlue; /* Blue background */
+    border: none; /* Remove borders */
+    color: white; /* White text */
+    padding: 2px 4px; /* Some padding */
+    font-size: 20px; /* Set a font size */
+    cursor: pointer; /* Mouse pointer on hover */
+    float: left;
+    margin-left: 3px;
+    margin-bottom: 3px;
+}
+/* Darker background on mouse-hover used in note.html */
+#delete_note_form .btn:hover {
+    background-color: RoyalBlue;
+}
 
+.flex-container >div {
+    min-width: 260px;
+    width: 32%;
+    background-color: #fcfccf;
+    margin-bottom: 1%;
+    margin-right: 1%;
+    padding-top: 2%;
+}
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+}
+#all_notes_flex textarea {
+    background-color: #fcfccf;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    width: 90%;
+    border-width:0px;
+    border:none;
+    box-shadow:none;
+    outline: none;
+    overflow:hidden;
+}
+.notice {
+    font-weight: 400;
+    font-size: larger;
+    width: 100%;
+    margin-left: 1%;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+/* Centralize and make text bolder of the error message in error.html */
+#error_message {
+    text-align: center;
+    font-size: xx-large;
+    font-weight: bolder;
+}
